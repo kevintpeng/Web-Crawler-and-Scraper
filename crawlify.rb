@@ -1,5 +1,6 @@
 module Crawlify
   require 'pathname'
+  require 'fileutils'
   require 'rest-client'
   require 'nokogiri'
 
@@ -43,6 +44,8 @@ module Crawlify
     # fetches and saves resource
     def save(resource_path, body)
       output_path = File.expand_path(@output, resource_path)
+      required_dirs = output_path.match(%r{(.*?)([^/]*)$})[1]
+      FileUtils.mkdir_p(required_dirs)
       File.open(output_path, 'wb') do |fo|
         fo.write body
       end
