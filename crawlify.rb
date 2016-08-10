@@ -65,6 +65,10 @@ module Crawlify
       end
     end
 
+    def zip
+      system("zip -r #{@output}_crawlify #{@output}")
+    end
+
     private
 
     def base_path(string)
