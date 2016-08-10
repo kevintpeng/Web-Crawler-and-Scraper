@@ -24,7 +24,7 @@ module Crawlify
     end
 
     def crawl(resource_path, url)
-      @seen << resource_path
+      @seen << resource_path # make this a mapping
       puts "#CRAWL  #{resource_path} => #{url}"
       base = base_path(resource_path)
       base_url = url.match(%r{^https?://([^/]*)})[0]
@@ -37,7 +37,7 @@ module Crawlify
 
       # since we're pulling all sorts of files, we need to check encoding before matching against regex
       return if (body.valid_encoding?) && @stop && (body =~ @stop)
-      save(resource_path, body)
+
 
       # parse html
       if @doc_type == 'html' && resource_path =~ /(html|HTML)$/
@@ -48,9 +48,13 @@ module Crawlify
         to_crawl = (js + img + links).uniq
         puts to_crawl
         to_crawl.each do |resource|
-          crawl("#{base}#{resource}", "#{base_url}/#{resource}") unless @seen.include? "#{base}#{resource}"
+        
+          # gsub if @seen.include? "#{base}#{resource}", else
+
+          crawl("#{base}#{resource}", "#{base_url}/#{resource}")
         end
       end
+      save(resource_path, body)
       true
     end
 
