@@ -1,0 +1,4 @@
+config/*
+!config/.gitkeep
+output/*
+!output/.gitkeep
