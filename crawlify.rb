@@ -20,12 +20,16 @@ module Crawlify
       @headers = Crawlify.parse_headers(File.read("#{@path}/headers"))
       @output = "#{Crawlify::ROOT}/output/#{@name}"
       @doc_type = options[:doc_type] || 'html'
+      @seen = []
     end
 
     def crawl(resource_path, url)
-      base_url = url.match(%r{^([^/]*)})[0]
+      @seen << resource_path
+      puts "#CRAWL  #{resource_path} => #{url}"
+      base = base_path(resource_path)
+      base_url = url.match(%r{^https?://([^/]*)})[0]
       body = RestClient.get(url, @headers).body
-      return if body =~ @stop
+      return if (resource_path =~ /(html|HTML)$/) && (body =~ @stop)
       save(resource_path, body)
 
       # parse html
@@ -34,21 +38,30 @@ module Crawlify
         js = Crawlify.all_src_for_tag(doc, 'script')
         img = Crawlify.all_src_for_tag(doc, 'img')
         links = doc.xpath("//a/@onclick").to_a.map { |e| (e.to_s.match(/window\.open\('([^']*?)',/) || [])[1] }.compact
-        to_crawl = js + img + links
+        to_crawl = (js + img + links).uniq
+        puts to_crawl
         to_crawl.each do |resource|
-          crawl(resource, "#{base_url}/#{resource}")
+          crawl("#{base}#{resource}", "#{base_url}/#{resource}") unless @seen.include? "#{base}#{resource}"
         end
       end
+      true
     end
 
     # fetches and saves resource
     def save(resource_path, body)
-      output_path = File.expand_path(@output, resource_path)
-      required_dirs = output_path.match(%r{(.*?)([^/]*)$})[1]
-      FileUtils.mkdir_p(required_dirs)
+      output_path = "#{@output}/#{resource_path}"
+      return if File.exists? output_path
+      required_dirs = base_path(output_path)
+      FileUtils.mkdir_p(required_dirs) unless Dir.exists? required_dirs
       File.open(output_path, 'wb') do |fo|
         fo.write body
       end
+    end
+
+    private
+
+    def base_path(string)
+      string.match(%r{(.*?)([^/]*)$})[1]
     end
   end
 
