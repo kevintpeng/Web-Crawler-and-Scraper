@@ -28,8 +28,15 @@ module Crawlify
       puts "#CRAWL  #{resource_path} => #{url}"
       base = base_path(resource_path)
       base_url = url.match(%r{^https?://([^/]*)})[0]
-      body = RestClient.get(url, @headers).body
-      return if (resource_path =~ /(html|HTML)$/) && (body =~ @stop)
+      body = begin
+        RestClient.get(url, @headers).body
+      rescue RestClient::Forbidden
+        puts "#CRAWL::403 from #{url}"
+        return
+      end
+
+      # since we're pulling all sorts of files, we need to check encoding before matching against regex
+      return if (body.valid_encoding?) && @stop && (body =~ @stop)
       save(resource_path, body)
 
       # parse html
