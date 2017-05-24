@@ -1,7 +1,7 @@
 # ruby-scraper
 Ruby crawler and scraper for postgres or other SQL-based databases. Generates active record objects.
 
-##General Usage:
+## General Usage:
 1. Require or include the active record models. <br>
 2. Create a new scraper object `obj = Scraper.new`. <br>
 3. Use `Scraper.connectDatabase` to connect the remote heroku database.<br>
