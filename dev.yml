@@ -1,3 +1,4 @@
+# Shopify internal tool config file
 up: 
 - ruby: 2.3.1
 - bundler
