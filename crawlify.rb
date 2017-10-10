@@ -17,7 +17,12 @@ module Crawlify
       @stop = options[:stop] || nil # defines a terminating state, where crawl fails
       @path = "#{Crawlify::ROOT}/config/#{name}"
       @name = name
-      @headers = Crawlify.parse_headers(File.read("#{@path}/headers"))
+      headers_file = "#{@path}/headers"
+      @headers = if File.exists? headers_file
+        Crawlify.parse_headers(File.read(headers_file))
+      else
+        nil
+      end
       @output = "#{Crawlify::ROOT}/output/#{@name}"
       @doc_type = options[:doc_type] || 'html'
       @seen = []
