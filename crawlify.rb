@@ -67,7 +67,7 @@ module Crawlify
     def save(resource_path, body)
       output_path = "#{@output}/#{resource_path}"
       return if File.exists? output_path
-      required_dirs = base_path(output_path)
+      required_dirs = File.dirname(output_path)
       FileUtils.mkdir_p(required_dirs) unless Dir.exists? required_dirs
       File.open(output_path, 'wb') do |fo|
         fo.write body
